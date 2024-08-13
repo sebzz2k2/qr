@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 func getModeEncoding() string {
@@ -85,6 +86,28 @@ func getQrVersion(val int) (int, error) {
 	}
 	return 0, errors.New("Invalid version")
 }
+
+func getCharCapacityBits(version int) (int, error) {
+	maxChar := [40]int{
+		13, 22, 34, 48, 62, 76, 88, 110, 132, 154,180, 
+		206, 244, 261, 295, 325, 367, 397, 445,485, 512,
+		568, 614, 664, 718, 754, 808, 871, 911, 985, 1033, 
+		1115, 1171, 1231, 1286, 1354, 1426, 1502, 1582, 1666 }
+
+	if version >= 1 && version <= 40 {
+		return maxChar[version - 1] * 8, nil
+	}
+	return 0, errors.New("Invalid version")
+}
+
+func getTerminator(diff int) string {
+	if diff < 4 {
+		return strings.Repeat("0", diff)
+	} else {
+		return "0000"
+	}
+}
+
 func main() {
 	str := "HELLO WORLD"
 	qrVer, err := getQrVersion(len(str))
@@ -97,7 +120,10 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	encodedStr := getEncodedDataStr(str)
-
-	fmt.Println(encodedStr, charCount, modeEncoding)
-
+	charCapacity, err := getCharCapacityBits(qrVer)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	terminator := getTerminator(charCapacity - len(encodedStr))
+	fmt.Println(encodedStr, charCount, modeEncoding, terminator)
 }
