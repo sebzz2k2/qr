@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func getModeEncoding() string {
+func getModeIndicator() string {
 	// only alphanumeric for now
 	return fmt.Sprintf("%04s", strconv.FormatInt(int64(0b0010), 2))
 }
@@ -89,23 +89,27 @@ func getQrVersion(val int) (int, error) {
 
 func getCharCapacityBits(version int) (int, error) {
 	maxChar := [40]int{
-		13, 22, 34, 48, 62, 76, 88, 110, 132, 154,180, 
-		206, 244, 261, 295, 325, 367, 397, 445,485, 512,
-		568, 614, 664, 718, 754, 808, 871, 911, 985, 1033, 
-		1115, 1171, 1231, 1286, 1354, 1426, 1502, 1582, 1666 }
+		13, 22, 34, 48, 62, 76, 88, 110, 132, 154, 180,
+		206, 244, 261, 295, 325, 367, 397, 445, 485, 512,
+		568, 614, 664, 718, 754, 808, 871, 911, 985, 1033,
+		1115, 1171, 1231, 1286, 1354, 1426, 1502, 1582, 1666}
 
 	if version >= 1 && version <= 40 {
-		return maxChar[version - 1] * 8, nil
+		return maxChar[version-1] * 8, nil
 	}
 	return 0, errors.New("Invalid version")
 }
 
 func getTerminator(diff int) string {
 	if diff < 4 {
-		return strings.Repeat("0", diff)
+		return getZeroes(diff)
 	} else {
-		return "0000"
+		return getZeroes(4)
 	}
+}
+
+func getZeroes(count int) string {
+	return strings.Repeat("0", count)
 }
 
 func main() {
@@ -114,7 +118,7 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	modeEncoding := getModeEncoding()
+	modeIndicator := getModeIndicator()
 	charCount, err := getCharCountIndicator(qrVer, len(str))
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -125,5 +129,9 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	terminator := getTerminator(charCapacity - len(encodedStr))
-	fmt.Println(encodedStr, charCount, modeEncoding, terminator)
+	encodedStr = modeIndicator + charCount + encodedStr + terminator
+	pad := getZeroes(8 - len(encodedStr)%8)
+	encodedStr = encodedStr + pad
+
+	fmt.Println(encodedStr)
 }
