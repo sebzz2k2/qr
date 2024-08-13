@@ -1,16 +1,76 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
 )
 
-func getMode() string {
+func getModeEncoding() string {
 	// only alphanumeric for now
 	return fmt.Sprintf("%04s", strconv.FormatInt(int64(0b0010), 2))
 }
-func getQrVersion(val int) int {
+
+func getNumRepresentation(char rune) (int, error) {
+	var CharacterMap = map[rune]int{
+		'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+		'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'J': 19,
+		'K': 20, 'L': 21, 'M': 22, 'N': 23, 'O': 24, 'P': 25, 'Q': 26, 'R': 27, 'S': 28, 'T': 29,
+		'U': 30, 'V': 31, 'W': 32, 'X': 33, 'Y': 34, 'Z': 35, ' ': 36, '$': 37, '%': 38,
+		'*': 39, '+': 40, '-': 41, '.': 42, '/': 43, ':': 44,
+	}
+	char = rune(string(char)[0])
+	if value, exists := CharacterMap[char]; exists {
+		return value, nil
+	}
+	return -1, fmt.Errorf("character %c not found in the map", char)
+}
+func getEncodedDataStr(s string) string {
+	pairValues := [][]int{}
+	for i := 0; i < len(s); i += 2 {
+		var pair string
+		if i+1 < len(s) {
+			pair = s[i : i+2]
+		} else {
+			pair = s[i : i+1]
+		}
+		values := []int{}
+		for _, char := range pair {
+			value, err := getNumRepresentation(char)
+			if err != nil {
+				fmt.Println(err)
+			}
+			values = append(values, value)
+		}
+		pairValues = append(pairValues, values)
+	}
+	str := ""
+	for i := 0; i < len(pairValues); i++ {
+		if len(pairValues[i]) > 1 {
+			interVal := pairValues[i][0]*45 + pairValues[i][1]
+			str += fmt.Sprintf("%011s", strconv.FormatInt(int64(interVal), 2))
+		} else {
+			str += fmt.Sprintf("%06s", strconv.FormatInt(int64(pairValues[i][0]), 2))
+		}
+	}
+	return str
+}
+
+func getCharCountIndicator(version int, charLen int) (string, error) {
+	if version >= 1 && version <= 9 {
+		return fmt.Sprintf("%09s", strconv.FormatInt(int64(charLen), 2)), nil
+	}
+	if version >= 10 && version <= 26 {
+		return fmt.Sprintf("%011s", strconv.FormatInt(int64(charLen), 2)), nil
+	}
+	if version >= 27 && version <= 40 {
+		return fmt.Sprintf("%013s", strconv.FormatInt(int64(charLen), 2)), nil
+	}
+	return "", errors.New("Invalid version")
+}
+
+func getQrVersion(val int) (int, error) {
 	maxChar := [40]int{
 		16, 29, 47, 67, 87, 108, 125, 157, 189, 221,
 		259, 296, 352, 376, 426, 470, 531, 574, 644, 702,
@@ -20,18 +80,24 @@ func getQrVersion(val int) int {
 
 	for i := 0; i < len(maxChar); i++ {
 		if maxChar[i] >= val {
-			return i + 1
+			return i + 1, nil
 		}
 	}
-	return 0
+	return 0, errors.New("Invalid version")
 }
 func main() {
 	str := "HELLO WORLD"
-	qrVer := getQrVersion(len(str))
-	if qrVer == 0 {
-		log.Fatalf(`Sting is not encodeable`)
+	qrVer, err := getQrVersion(len(str))
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
-	fmt.Println(qrVer)
-	j := getMode()
-	fmt.Println(j)
+	modeEncoding := getModeEncoding()
+	charCount, err := getCharCountIndicator(qrVer, len(str))
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	encodedStr := getEncodedDataStr(str)
+
+	fmt.Println(encodedStr, charCount, modeEncoding)
+
 }
