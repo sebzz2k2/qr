@@ -3,8 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 )
 
+func getMode() string {
+	// only alphanumeric for now
+	return fmt.Sprintf("%04s", strconv.FormatInt(int64(0b0010), 2))
+}
 func getQrVersion(val int) int {
 	maxChar := [40]int{
 		16, 29, 47, 67, 87, 108, 125, 157, 189, 221,
@@ -27,4 +32,6 @@ func main() {
 		log.Fatalf(`Sting is not encodeable`)
 	}
 	fmt.Println(qrVer)
+	j := getMode()
+	fmt.Println(j)
 }
