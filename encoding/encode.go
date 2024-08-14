@@ -15,7 +15,9 @@ func GetQrVersion(val int) (int, error) {
 		742, 823, 890, 963, 1041, 1094, 1172, 1263, 1322, 1429,
 		1499, 1618, 1700, 1787, 1867, 1966, 2071, 2181, 2298, 2420,
 	}
-
+	if val == 0 {
+		return 0, errors.New("Invalid version")
+	}
 	for i := 0; i < len(maxChar); i++ {
 		if maxChar[i] >= val {
 			return i + 1, nil
@@ -43,6 +45,7 @@ func GetNumRepresentation(char rune) (int, error) {
 	}
 	return -1, fmt.Errorf("character %c not found in the map", char)
 }
+
 func GetEncodedDataStr(strPtr *string) string {
 	s := *strPtr
 	pairValues := [][]int{}
