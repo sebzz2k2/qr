@@ -2,6 +2,7 @@ package encoding
 
 import (
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -20,10 +21,10 @@ func TestGetNumRepresentation(t *testing.T) {
 	}
 
 	var numbRepTests = []numbRepTest{
-		numbRepTest{'0', 0},
-		numbRepTest{'1', 1},
-		numbRepTest{'A', 10},
-		numbRepTest{'-', 41},
+		{'0', 0},
+		{'1', 1},
+		{'A', 10},
+		{'-', 41},
 	}
 	for _, test := range numbRepTests {
 		if output, _ := GetNumRepresentation(test.arg1); output != test.exp {
@@ -162,5 +163,23 @@ func TestGetQrVersion(t *testing.T) {
 					t.Errorf("Expected result: %d, got: %d", tt.expected, result)
 				}
 			})
+	}
+}
+
+func TestGetEncodedDataStr(t *testing.T) {
+	input := "HELLO WORLD"
+	expectedOutput := "01100001011" + "01111000110" + "10001011100" + "10110111000" + "10011010100" + "001101"
+	result := GetEncodedDataStr(&input)
+	if result != expectedOutput {
+		t.Errorf("Expected %s but got %s", expectedOutput, result)
+	}
+}
+
+func TestEncode(t *testing.T) {
+	inp := "HELLO WORLD"
+	got := Encode(&inp)
+	expected := "00100000010110110000101101111000110100010111001011011100010011010100001101000000111011000001000111101100"
+	if got != expected {
+		log.Fatalf("Expected: %s, got: %s", expected, got)
 	}
 }
