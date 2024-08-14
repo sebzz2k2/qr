@@ -112,13 +112,23 @@ func getZeroes(count int) string {
 	return strings.Repeat("0", count)
 }
 
+func genPadding(length int, capacity int) string {
+	diff := capacity - length
+	q := diff / 8
+	extraBits := [2]string{"11101100", "00010001"}
+	pad := ""
+	for i := 0; i < q; i++ {
+		pad += extraBits[i%2]
+	}
+	return pad
+}
+
 func main() {
 	str := "HELLO WORLD"
 	qrVer, err := getQrVersion(len(str))
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	modeIndicator := getModeIndicator()
 	charCount, err := getCharCountIndicator(qrVer, len(str))
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -128,10 +138,8 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	terminator := getTerminator(charCapacity - len(encodedStr))
-	encodedStr = modeIndicator + charCount + encodedStr + terminator
-	pad := getZeroes(8 - len(encodedStr)%8)
-	encodedStr = encodedStr + pad
-
+	encodedStr = getModeIndicator() + charCount + encodedStr + getTerminator(charCapacity-len(encodedStr))
+	encodedStr = encodedStr + getZeroes(8-len(encodedStr)%8)
+	encodedStr = encodedStr + genPadding(len(encodedStr), charCapacity)
 	fmt.Println(encodedStr)
 }
