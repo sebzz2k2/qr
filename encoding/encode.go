@@ -3,6 +3,7 @@ package encoding
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -28,7 +29,7 @@ func GetModeIndicator() string {
 	return fmt.Sprintf("%04s", strconv.FormatInt(int64(0b0010), 2))
 }
 
-func getNumRepresentation(char rune) (int, error) {
+func GetNumRepresentation(char rune) (int, error) {
 	var CharacterMap = map[rune]int{
 		'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
 		'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'J': 19,
@@ -42,7 +43,8 @@ func getNumRepresentation(char rune) (int, error) {
 	}
 	return -1, fmt.Errorf("character %c not found in the map", char)
 }
-func GetEncodedDataStr(s string) string {
+func GetEncodedDataStr(strPtr *string) string {
+	s := *strPtr
 	pairValues := [][]int{}
 	for i := 0; i < len(s); i += 2 {
 		var pair string
@@ -53,7 +55,7 @@ func GetEncodedDataStr(s string) string {
 		}
 		values := []int{}
 		for _, char := range pair {
-			value, err := getNumRepresentation(char)
+			value, err := GetNumRepresentation(char)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -120,4 +122,24 @@ func GenPadding(length int, capacity int) string {
 		pad += extraBits[i%2]
 	}
 	return pad
+}
+
+func Encode(s *string) string {
+	encodedStr := GetEncodedDataStr(s)
+	qrVer, err := GetQrVersion(len(*s))
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	charCount, err := GetCharCountIndicator(qrVer, len(*s))
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	charCapacity, err := GetCharCapacityBits(qrVer)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	encodedStr = GetModeIndicator() + charCount + encodedStr + GetTerminator(charCapacity-len(encodedStr))
+	encodedStr = encodedStr + GetZeroes(8-len(encodedStr)%8)
+	encodedStr = encodedStr + GenPadding(len(encodedStr), charCapacity)
+	return encodedStr
 }
