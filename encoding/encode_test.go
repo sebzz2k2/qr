@@ -14,25 +14,6 @@ func TestGetModeIndicator(t *testing.T) {
 	}
 }
 
-func TestGetNumRepresentation(t *testing.T) {
-	type numbRepTest struct {
-		arg1 rune
-		exp  int
-	}
-
-	var numbRepTests = []numbRepTest{
-		{'0', 0},
-		{'1', 1},
-		{'A', 10},
-		{'-', 41},
-	}
-	for _, test := range numbRepTests {
-		if output, _ := GetNumRepresentation(test.arg1); output != test.exp {
-			t.Errorf("Output %q not equal to expected %q", output, test.exp)
-		}
-	}
-}
-
 func TestGetCharCountIndicator(t *testing.T) {
 	tests := []struct {
 		version   int
@@ -58,35 +39,6 @@ func TestGetCharCountIndicator(t *testing.T) {
 				t.Errorf("Expected result: %s, got: %s", tt.expected, result)
 			}
 		})
-	}
-}
-
-func TestGetCharCapacityBits(t *testing.T) {
-	tests := []struct {
-		version   int
-		expected  int
-		expectErr bool
-	}{
-		{version: 1, expected: 13 * 8, expectErr: false},
-		{version: 9, expected: 132 * 8, expectErr: false},
-		{version: 20, expected: 485 * 8, expectErr: false},
-		{version: 40, expected: 1666 * 8, expectErr: false},
-		{version: 0, expected: 0, expectErr: true},
-		{version: 41, expected: 0, expectErr: true},
-	}
-
-	for _, tt := range tests {
-		t.Run(
-			"Version_"+string(rune(tt.version)),
-			func(t *testing.T) {
-				result, err := GetCharCapacityBits(tt.version)
-				if (err != nil) != tt.expectErr {
-					t.Errorf("Expected error: %v, got: %v", tt.expectErr, err)
-				}
-				if result != tt.expected {
-					t.Errorf("Expected result: %d, got: %d", tt.expected, result)
-				}
-			})
 	}
 }
 
@@ -177,7 +129,7 @@ func TestGetEncodedDataStr(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	inp := "HELLO WORLD"
-	got := Encode(&inp)
+	got := Encode(&inp, 1)
 	expected := "00100000010110110000101101111000110100010111001011011100010011010100001101000000111011000001000111101100"
 	if got != expected {
 		log.Fatalf("Expected: %s, got: %s", expected, got)
