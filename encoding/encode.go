@@ -100,18 +100,13 @@ func GenPadding(length int, capacity int) string {
 	return pad
 }
 
-func Encode(s *string, qrVer int) string {
+func Encode(s *string, qrVer int, charCapacity int) string {
 	encodedStr := GetEncodedDataStr(s)
 
 	charCount, err := GetCharCountIndicator(qrVer, len(*s))
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	errCorrVals, err := utils.GetErrCorrVals(qrVer)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	charCapacity := errCorrVals.TotalDataCodewords * 8
 
 	encodedStr = GetModeIndicator() + charCount + encodedStr + GetTerminator(charCapacity-len(encodedStr))
 	encodedStr = encodedStr + GetZeroes(8-len(encodedStr)%8)

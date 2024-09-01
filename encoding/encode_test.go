@@ -129,7 +129,7 @@ func TestGetEncodedDataStr(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	inp := "HELLO WORLD"
-	got := Encode(&inp, 1)
+	got := Encode(&inp, 1, 13*8)
 	expected := "00100000010110110000101101111000110100010111001011011100010011010100001101000000111011000001000111101100"
 	if got != expected {
 		log.Fatalf("Expected: %s, got: %s", expected, got)
