@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sebzz2k2/qr/encoding"
 	"github.com/sebzz2k2/qr/errorCorrection"
+	"strconv"
 
 	"log"
 )
@@ -53,6 +55,21 @@ func GetGBC(data string, ec *errorCorrection.QRCodeData) [][][]string {
 	return [][][]string{g1Arr, g2Arr}
 }
 
+func GetGBCArrToBinary(binaryArray [][][]string) [][][]int {
+	decimalArray := make([][][]int, len(binaryArray))
+	for i := range binaryArray {
+		decimalArray[i] = make([][]int, len(binaryArray[i]))
+		for j := range binaryArray[i] {
+			decimalArray[i][j] = make([]int, len(binaryArray[i][j]))
+			for k, binaryStr := range binaryArray[i][j] {
+				decimalValue, _ := strconv.ParseInt(binaryStr, 2, 64)
+				decimalArray[i][j][k] = int(decimalValue)
+			}
+		}
+	}
+	return decimalArray
+}
+
 func main() {
 	//str := "HELLO WORLD"
 	str := "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG AND THEN RUNS AWAY QUICKLY OUT OF SIGHT"
@@ -66,6 +83,7 @@ func main() {
 	}
 	encodedStr := encoding.Encode(&str, qrVer, ecVals.TotalDataCodewords*8)
 
-	GetGBC(encodedStr, ecVals)
-	//fmt.Println( blocks)
+	gbc := GetGBC(encodedStr, ecVals)
+	gbcDec := GetGBCArrToBinary(gbc)
+	fmt.Println(gbcDec)
 }
