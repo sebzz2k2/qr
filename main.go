@@ -17,19 +17,25 @@ func GetCodeBlocks(str string) []string {
 	return codeBlock
 }
 
+func getDecimal(data string) int {
+	decimalValue, _ := strconv.ParseInt(data, 2, 64)
+	intVal := int(decimalValue)
+	return intVal
+}
+
 // GetGBC G -> group B -> block C -> codeword
-func GetGBC(data string, ec *errorCorrection.QRCodeData) [][][]string {
+func GetGBC(data string, ec *errorCorrection.QRCodeData) [][][]int {
 	codeblocks := GetCodeBlocks(data)
 
 	//g1Arr and g2Arr are initialized with the number of blocks and codewords per block as defined in ec.
-	g1Arr := make([][]string, ec.Group1Blocks)
+	g1Arr := make([][]int, ec.Group1Blocks)
 	for i := range g1Arr {
-		g1Arr[i] = make([]string, ec.Group1DataCodewordsPerBlock)
+		g1Arr[i] = make([]int, ec.Group1DataCodewordsPerBlock)
 	}
 
-	g2Arr := make([][]string, ec.Group2Blocks)
+	g2Arr := make([][]int, ec.Group2Blocks)
 	for i := range g2Arr {
-		g2Arr[i] = make([]string, ec.Group2DataCodewordsPerBlock)
+		g2Arr[i] = make([]int, ec.Group2DataCodewordsPerBlock)
 	}
 
 	//	Iterate through codeblocks.
@@ -42,32 +48,19 @@ func GetGBC(data string, ec *errorCorrection.QRCodeData) [][][]string {
 			// Determine the target block and position in g1Arr
 			row := blockIndex / ec.Group1DataCodewordsPerBlock
 			col := blockIndex % ec.Group1DataCodewordsPerBlock
-			g1Arr[row][col] = block
+			blockInt := getDecimal(block)
+			g1Arr[row][col] = blockInt
 		} else {
 			// Shift the index for g2Arr
 			g2Index := blockIndex - len(g1Arr)*ec.Group1DataCodewordsPerBlock
 			row := g2Index / ec.Group2DataCodewordsPerBlock
 			col := g2Index % ec.Group2DataCodewordsPerBlock
-			g2Arr[row][col] = block
+			blockInt := getDecimal(block)
+			g2Arr[row][col] = blockInt
 		}
 		blockIndex++
 	}
-	return [][][]string{g1Arr, g2Arr}
-}
-
-func GetGBCArrToBinary(binaryArray [][][]string) [][][]int {
-	decimalArray := make([][][]int, len(binaryArray))
-	for i := range binaryArray {
-		decimalArray[i] = make([][]int, len(binaryArray[i]))
-		for j := range binaryArray[i] {
-			decimalArray[i][j] = make([]int, len(binaryArray[i][j]))
-			for k, binaryStr := range binaryArray[i][j] {
-				decimalValue, _ := strconv.ParseInt(binaryStr, 2, 64)
-				decimalArray[i][j][k] = int(decimalValue)
-			}
-		}
-	}
-	return decimalArray
+	return [][][]int{g1Arr, g2Arr}
 }
 
 func main() {
@@ -84,6 +77,5 @@ func main() {
 	encodedStr := encoding.Encode(&str, qrVer, ecVals.TotalDataCodewords*8)
 
 	gbc := GetGBC(encodedStr, ecVals)
-	gbcDec := GetGBCArrToBinary(gbc)
-	fmt.Println(gbcDec)
+	fmt.Println(gbc)
 }
