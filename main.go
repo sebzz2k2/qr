@@ -64,16 +64,16 @@ func GetGBC(data string, ec *errorCorrection.QRCodeData) [][][]int {
 	return [][][]int{g1Arr, g2Arr}
 }
 
-type Term struct {
+type GenPolyTerm struct {
 	Alpha int
 	X     int
 }
 
-func getGeneratorPolynomial(ecCodeWords int) ([]Term, error) {
+func getGeneratorPolynomial(ecCodeWords int) ([]GenPolyTerm, error) {
 	if ecCodeWords < 7 {
 		return nil, errors.New("input should not be less than 7")
 	}
-	polynomials := [][]Term{
+	polynomials := [][]GenPolyTerm{
 		{
 			{Alpha: 0, X: 7},
 			{Alpha: 87, X: 6},
@@ -384,6 +384,23 @@ func getGeneratorPolynomial(ecCodeWords int) ([]Term, error) {
 		},
 	}
 	return polynomials[ecCodeWords-7], nil
+}
+
+type MsgPolyTerm struct {
+	CoEff int
+	X     int
+}
+
+func getMsgPolynomial(arr []int) []MsgPolyTerm {
+	arrLen := len(arr)
+	var msgPoly []MsgPolyTerm
+	for i := 0; i < arrLen; i++ {
+		msgPoly = append(msgPoly, MsgPolyTerm{
+			CoEff: arr[i],
+			X:     arrLen - (1 + i),
+		})
+	}
+	return msgPoly
 }
 
 func main() {
