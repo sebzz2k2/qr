@@ -3,7 +3,7 @@ package encoding
 import (
 	"errors"
 	"fmt"
-	"github.com/sebzz2k2/qr/utils"
+	"github.com/sebzz2k2/qr/lib"
 	"log"
 	"strconv"
 	"strings"
@@ -44,7 +44,7 @@ func GetEncodedDataStr(strPtr *string) string {
 		}
 		var values []int
 		for _, char := range pair {
-			value, err := utils.GetNumRepresentation(char)
+			value, err := lib.GetNumRepresentation(char)
 			if err != nil {
 				fmt.Println(err)
 			}

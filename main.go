@@ -2,12 +2,9 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"github.com/sebzz2k2/qr/encoding"
 	"github.com/sebzz2k2/qr/errorCorrection"
+	"github.com/sebzz2k2/qr/lib"
 	"strconv"
-
-	"log"
 )
 
 func GetCodeBlocks(str string) []string {
@@ -405,17 +402,26 @@ func getMsgPolynomial(arr []int) []MsgPolyTerm {
 
 func main() {
 	//str := "HELLO WORLD"
-	str := "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG AND THEN RUNS AWAY QUICKLY OUT OF SIGHT"
-	qrVer, err := encoding.GetQrVersion(len(str))
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	ecVals, err := errorCorrection.GetErrCorrVals(qrVer)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	encodedStr := encoding.Encode(&str, qrVer, ecVals.TotalDataCodewords*8)
+	//str := "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG AND THEN RUNS AWAY QUICKLY OUT OF SIGHT"
+	//qrVer, err := encoding.GetQrVersion(len(str))
+	//if err != nil {
+	//	log.Fatalf(err.Error())
+	//}
+	//ecVals, err := errorCorrection.GetErrCorrVals(qrVer)
+	//if err != nil {
+	//	log.Fatalf(err.Error())
+	//}
+	//encodedStr := encoding.Encode(&str, qrVer, ecVals.TotalDataCodewords*8)
+	//
+	//gbc := GetGBC(encodedStr, ecVals)
+	//fmt.Println(gbc)
+	//
+	//for _, groups := range gbc {
+	//	for i, blocks := range groups {
+	//		msgPoly := getMsgPolynomial(blocks)
+	//		fmt.Println(msgPoly, i)
+	//	}
+	//}
 
-	gbc := GetGBC(encodedStr, ecVals)
-	fmt.Println(gbc)
+	lib.LongDivide([]lib.Term{{3, 2}, {1, 1}, {1, 0}}, []lib.Term{{1, 1}, {1, 0}})
 }
