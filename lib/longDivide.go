@@ -1,12 +1,11 @@
 package lib
 
-import (
-	"fmt"
-	"math"
-)
-
 func PowDivide(exp1 int, exp2 int) int {
-	return int(math.Abs(float64(exp1 - exp2)))
+	return exp1 - exp2
+}
+
+func PowMultiply(exp1 int, exp2 int) int {
+	return exp1 + exp2
 }
 
 type Term struct {
@@ -14,45 +13,49 @@ type Term struct {
 	Pow   int
 }
 
-func LongDivide(dividend []Term, divisor []Term) {
-	i := 0
-	var q []Term
-	for i < len(dividend) && i < len(divisor) {
-		if divisor[i].CoEff != 0 && dividend[i].CoEff != 0 {
-			q = append(q, Term{
-				CoEff: dividend[i].CoEff / divisor[i].CoEff,
-				Pow:   PowDivide(dividend[i].Pow, divisor[i].Pow),
-			})
-		}
-		i++
-
+func TermMultiply(term1 Term, term2 Term) Term {
+	return Term{
+		CoEff: term1.CoEff * term2.CoEff,
+		Pow:   PowMultiply(term1.Pow, term2.Pow),
 	}
-	fmt.Println(q)
 }
 
-//
-//import (
-//"fmt"
-//"math"
-//)
-//
-//type Term struct {
-//	CoEff int
-//	Pow   int
-//}
-//
-//func PowDivide(exp1 int, exp2 int) int {
-//	return int(math.Abs(float64(exp1 - exp2)))
-//}
-//
-//func longDivide(dividend []Term, divisor []Term) {
-//	fmt.Println(dividend, divisor)
-//
-//}
-//
-//func main() {
-//	dividend := []Term{{3, 2}, {1, 1}, {1, 0}}
-//	divisor := []Term{{1, 1}, {1, 0}}
-//
-//	longDivide(dividend, divisor)
-//}
+func TermDivide(term1 Term, term2 Term) Term {
+	return Term{
+		CoEff: term1.CoEff / term2.CoEff,
+		Pow:   PowDivide(term1.Pow, term2.Pow),
+	}
+}
+
+func TermSub(term1 Term, term2 Term) Term {
+	return Term{
+		CoEff: term1.CoEff - term2.CoEff,
+		Pow:   term1.Pow,
+	}
+}
+func LongDivide(dividend []Term, divisor []Term) []Term {
+	var quotient []Term
+	for len(dividend) > 0 && len(dividend) >= len(divisor) {
+		quotientTerm := TermDivide(dividend[0], divisor[0])
+		quotient = append(quotient, quotientTerm)
+
+		// quotientTerm * divisor
+		var qTermDivisor []Term
+		for _, divisorTerm := range divisor {
+			qTermDivisor = append(qTermDivisor, TermMultiply(divisorTerm, quotientTerm))
+		}
+
+		var newDividend []Term
+		for k := 0; k < len(dividend); k++ {
+			if k >= len(qTermDivisor) {
+				newDividend = append(newDividend, dividend[k])
+				continue
+			}
+			if dividend[k].CoEff != qTermDivisor[k].CoEff {
+				newDividend = append(newDividend, TermSub(dividend[k], qTermDivisor[k]))
+			}
+		}
+		dividend = newDividend
+	}
+	return quotient
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/sebzz2k2/qr/errorCorrection"
 	"github.com/sebzz2k2/qr/lib"
 	"strconv"
@@ -423,5 +424,6 @@ func main() {
 	//	}
 	//}
 
-	lib.LongDivide([]lib.Term{{3, 2}, {1, 1}, {1, 0}}, []lib.Term{{1, 1}, {1, 0}})
+	q := lib.LongDivide([]lib.Term{{3, 2}, {1, 1}, {-1, 0}}, []lib.Term{{1, 1}, {1, 0}})
+	fmt.Println(q)
 }
